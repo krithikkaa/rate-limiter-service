@@ -1,0 +1,87 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: rate-limiter-service
+
+  # ── Supabase PostgreSQL ──────────────────────────────────────────────────────
+  # Replace with your actual Supabase project values from:
+  # Supabase Dashboard → Settings → Database → Connection string (JDBC)
+  datasource:
+    url: jdbc:postgresql://db.fjiwltzsimgappaciazw.supabase.co:5432/postgres
+    username: postgres
+    password: "E5usd3tbhj@"
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update           # creates/updates tables on startup
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # ── Redis ────────────────────────────────────────────────────────────────────
+  # Local: use docker-compose.yml
+  # Production: use Redis Cloud free tier (redis.io/try-free)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+
+
+# ── Rate Limiter Config ────────────────────────────────────────────────────────
+rate-limiter:
+  # Token Bucket defaults (per API key)
+  token-bucket:
+    capacity: 100              # max burst
+    refill-tokens: 10          # tokens added per refill
+    refill-interval-seconds: 1 # refill every N seconds
+
+  # Sliding Window defaults (per API key)
+  sliding-window:
+    window-size-seconds: 60    # 1 minute window
+    max-requests: 60           # 60 requests per minute
+
+  # Alert thresholds
+  alert:
+    warning-threshold-percent: 80   # alert at 80% usage
+    redis-key-ttl-seconds: 3600     # TTL for Redis keys
+
+# ── Swagger ───────────────────────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+    tags-sorter: alpha
+
+# ── Actuator ─────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.krithika.ratelimiter: DEBUG
+    org.springframework.data.redis: INFO

@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  data:
+    redis:
+      host: localhost
+      port: 6370   # embedded Redis port for tests
+
+rate-limiter:
+  token-bucket:
+    capacity: 10
+    refill-tokens: 10
+    refill-interval-seconds: 60
+  sliding-window:
+    window-size-seconds: 60
+    max-requests: 10
+  alert:
+    warning-threshold-percent: 80
+    redis-key-ttl-seconds: 300
