@@ -262,18 +262,3 @@ Tests use **H2 in-memory database** and an **embedded Redis** on port 6370 — n
    - `REDIS_PORT`
 5. Railway auto-builds from your `Dockerfile`
 
----
-
-## Key Concepts for Interviews
-
-**Q: Why Redis for rate limiting and not the database?**  
-Redis operates in-memory with O(1) reads/writes. A database call (even Supabase) adds 5–20ms latency per request. Under high load, the database becomes a bottleneck. Redis handles 100K+ ops/second on a single node.
-
-**Q: Why Sliding Window over Fixed Window?**  
-Fixed window allows bursting at boundaries — a client can exhaust 60 requests at 11:59 PM and another 60 at 12:00 AM, effectively 120 in 2 minutes. Sliding window prevents this by always looking back exactly N seconds.
-
-**Q: How does Token Bucket allow bursting safely?**  
-It controls the *rate* of refill, not a hard per-minute cap. A client can burst 100 requests if tokens are available, but must wait for refill before the next burst. This matches real-world usage patterns better than strict window limits.
-
-**Q: How do you handle Redis being down?**  
-The filter catches exceptions and can be configured to fail-open (allow all requests) or fail-closed (reject all). In production, a circuit breaker (Resilience4j) would wrap Redis calls and fall back gracefully.
