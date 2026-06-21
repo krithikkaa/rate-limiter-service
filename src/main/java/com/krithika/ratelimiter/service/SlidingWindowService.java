@@ -70,9 +70,17 @@ public class SlidingWindowService {
      */
     @SuppressWarnings("unchecked")
     public RateLimitResult tryConsume(ApiClient client) {
-        String apiKey     = client.getApiKey();
-        int windowSeconds = resolve(client.getWindowSizeSeconds(),     defaultWindowSizeSeconds);
-        int maxRequests   = resolve(client.getMaxRequestsPerWindow(),  defaultMaxRequests);
+        String apiKey   = client.getApiKey();
+        int tierLimit   = client.getTier().getRequestsPerMinute();   // 0 for CUSTOM
+
+        // Precedence: explicit per-client override → tier default → yml fallback.
+        int maxRequests = (client.getMaxRequestsPerWindow() != null && client.getMaxRequestsPerWindow() > 0)
+                ? client.getMaxRequestsPerWindow()
+                : (tierLimit > 0 ? tierLimit : defaultMaxRequests);
+        // Tier budgets are per-minute, so a tier-driven client uses a 60s window.
+        int windowSeconds = (client.getWindowSizeSeconds() != null && client.getWindowSizeSeconds() > 0)
+                ? client.getWindowSizeSeconds()
+                : (tierLimit > 0 ? 60 : defaultWindowSizeSeconds);
 
         String key   = String.format(WINDOW_KEY, apiKey);
         long nowMs   = Instant.now().toEpochMilli();
@@ -123,9 +131,5 @@ public class SlidingWindowService {
                 .message("Rate limit exceeded. Max " + maxRequests + " requests per "
                         + windowSeconds + "s. Retry after " + retryAfter + "s.")
                 .build();
-    }
-
-    private int resolve(Integer clientValue, int defaultValue) {
-        return (clientValue != null && clientValue > 0) ? clientValue : defaultValue;
     }
 }

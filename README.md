@@ -90,7 +90,7 @@
 ### Step 1 — Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/rate-limiter-service.git
+git clone https://github.com/krithikkaa/rate-limiter-service.git
 cd rate-limiter-service
 ```
 
@@ -117,7 +117,7 @@ Create a `.env` file (never commit this):
 
 ```bash
 SUPABASE_DB_URL=jdbc:postgresql://db.xxxx.supabase.co:5432/postgres
-SUPABASE_DB_USER=postgres
+SUPABASE_DB_USERNAME=postgres
 SUPABASE_DB_PASSWORD=your_supabase_password
 REDIS_HOST=localhost
 REDIS_PORT=6379
@@ -256,7 +256,7 @@ Tests use **H2 in-memory database** and an **embedded Redis** on port 6370 — n
 3. Add a Redis plugin from the Railway dashboard
 4. Set environment variables:
    - `SUPABASE_DB_URL`
-   - `SUPABASE_DB_USER`
+   - `SUPABASE_DB_USERNAME`
    - `SUPABASE_DB_PASSWORD`
    - `REDIS_HOST` (Railway Redis internal host)
    - `REDIS_PORT`

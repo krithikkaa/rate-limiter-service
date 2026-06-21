@@ -73,11 +73,27 @@ public class ApiClient {
         SLIDING_WINDOW   // strict per-window limit
     }
 
+    /**
+     * Tier defines the default request budget per minute. This single value is
+     * the source of truth used both for the limit shown in the API response AND
+     * for the limit actually enforced by the algorithms (CUSTOM uses the
+     * per-client override fields instead).
+     */
     public enum Tier {
-        FREE,       // 30 req/min
-        BASIC,      // 60 req/min
-        PRO,        // 300 req/min
-        ENTERPRISE, // 1000 req/min
-        CUSTOM      // override fields used
+        FREE(30),
+        BASIC(60),
+        PRO(300),
+        ENTERPRISE(1000),
+        CUSTOM(0);   // 0 = not tier-driven; use override fields
+
+        private final int requestsPerMinute;
+
+        Tier(int requestsPerMinute) {
+            this.requestsPerMinute = requestsPerMinute;
+        }
+
+        public int getRequestsPerMinute() {
+            return requestsPerMinute;
+        }
     }
 }

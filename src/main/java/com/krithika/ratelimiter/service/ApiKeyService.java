@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,16 +20,6 @@ import java.util.stream.Collectors;
 public class ApiKeyService {
 
     private final ApiClientRepository apiClientRepository;
-
-    // Default limits per tier (requests per minute for sliding window /
-    // bucket capacity for token bucket)
-    private static final Map<Tier, Integer> TIER_LIMITS = Map.of(
-            Tier.FREE,       30,
-            Tier.BASIC,      60,
-            Tier.PRO,        300,
-            Tier.ENTERPRISE, 1000,
-            Tier.CUSTOM,     0    // uses override fields
-    );
 
     public ApiClientResponse register(ApiClientRequest request) {
         ApiClient client = ApiClient.builder()
@@ -75,7 +64,7 @@ public class ApiKeyService {
     private ApiClientResponse toResponse(ApiClient c) {
         int effectiveLimit = (c.getTier() == Tier.CUSTOM && c.getMaxRequestsPerWindow() != null)
                 ? c.getMaxRequestsPerWindow()
-                : TIER_LIMITS.getOrDefault(c.getTier(), 60);
+                : c.getTier().getRequestsPerMinute();
 
         return ApiClientResponse.builder()
                 .id(c.getId())

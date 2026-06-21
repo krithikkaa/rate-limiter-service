@@ -75,10 +75,27 @@ public class TokenBucketService {
      */
     @SuppressWarnings("unchecked")
     public RateLimitResult tryConsume(ApiClient client) {
-        String apiKey         = client.getApiKey();
-        int capacity          = resolve(client.getBucketCapacity(),         defaultCapacity);
-        int refillTokens      = resolve(client.getRefillTokens(),           defaultRefillTokens);
-        int refillInterval    = resolve(client.getRefillIntervalSeconds(),  defaultRefillIntervalSeconds);
+        String apiKey   = client.getApiKey();
+        int tierLimit   = client.getTier().getRequestsPerMinute();   // 0 for CUSTOM
+        boolean hasBucketOverride = client.getBucketCapacity() != null && client.getBucketCapacity() > 0;
+
+        int capacity, refillTokens, refillInterval;
+        if (hasBucketOverride) {
+            // Explicit per-client tuning wins.
+            capacity       = client.getBucketCapacity();
+            refillTokens   = resolve(client.getRefillTokens(),          defaultRefillTokens);
+            refillInterval = resolve(client.getRefillIntervalSeconds(), defaultRefillIntervalSeconds);
+        } else if (tierLimit > 0) {
+            // Tier budget is "N requests per minute": a bucket of N refilled fully each minute.
+            capacity       = tierLimit;
+            refillTokens   = tierLimit;
+            refillInterval = 60;
+        } else {
+            // CUSTOM with no overrides → application.yml defaults.
+            capacity       = defaultCapacity;
+            refillTokens   = defaultRefillTokens;
+            refillInterval = defaultRefillIntervalSeconds;
+        }
 
         String tokenKey = String.format(TOKEN_KEY, apiKey);
         String lastKey  = String.format(LAST_KEY, apiKey);
