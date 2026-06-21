@@ -1,0 +1,24 @@
+target/
+*.class
+*.jar
+*.war
+.env
+.env.local
+application-local.yml
+*.iml
+.idea/
+.vscode/
+*.DS_Store
+node_modules/
+
+# Local IDE run configuration (machine-specific)
+.run/
+
+# Interview / study notes — not part of the project
+INTERVIEW_PREP.md
+BNP_L2_MASTER_ANSWERS.md
+BNP_L2_MASTER_ANSWERS.html
+java_backend_notes.html
+*_notes.html
+package.json
+package-lock.json
